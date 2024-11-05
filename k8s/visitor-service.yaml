@@ -36,5 +36,4 @@ spec:
     - protocol: TCP
       port: 8050
       targetPort: 8050
-      nodePort: 30002  # NodePort 설정
-  type: NodePort
+
