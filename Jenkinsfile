@@ -3,7 +3,7 @@ pipeline {
 
 	environment{
 		DOCKER_IMAGE_OWNER = 'nanakia1031'
-		DOCKER_IMAGE_TAG = 'latest'
+		DOCKER_IMAGE_TAG = "v${BUILD_NUMBER}" // 매 빌드마다 고유 태그 생성
 		DOCKER_TOKEN = credentials('dockerhub')
 	}
 
