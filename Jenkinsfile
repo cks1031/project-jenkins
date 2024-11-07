@@ -47,7 +47,6 @@ pipeline {
         stage('Update ArgoCD Deployment YAML with Image Tags') {
             steps {
                 sh '''
-                sed -i 's|image: {{.Values.image.mariadb.repository}}:{{.Values.image.mariadb.tag}}|image: ${DOCKER_IMAGE_OWNER}/prj-mariadb:${DOCKER_IMAGE_TAG}|g' project-argocd/deploy-argocd/templates/deployment.yaml
                 sed -i 's|image: {{.Values.image.admin.repository}}:{{.Values.image.admin.tag}}|image: ${DOCKER_IMAGE_OWNER}/prj-admin:${DOCKER_IMAGE_TAG}|g' project-argocd/deploy-argocd/templates/deployment.yaml
                 sed -i 's|image: {{.Values.image.visitor.repository}}:{{.Values.image.visitor.tag}}|image: ${DOCKER_IMAGE_OWNER}/prj-visitor:${DOCKER_IMAGE_TAG}|g' project-argocd/deploy-argocd/templates/deployment.yaml
                 sed -i 's|image: {{.Values.image.frontend.repository}}:{{.Values.image.frontend.tag}}|image: ${DOCKER_IMAGE_OWNER}/prj-frontend:${DOCKER_IMAGE_TAG}|g' project-argocd/deploy-argocd/templates/deployment.yaml
