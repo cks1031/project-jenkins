@@ -48,17 +48,17 @@ pipeline {
                 script {
                     // Trigger the ArgoCD webhook after Docker image push
                     sh """
-                    curl -X POST ${ARGOCD_WEBHOOK_URL} \
+                    curl -k -X POST ${ARGOCD_WEBHOOK_URL} \
                     -H 'Content-Type: application/json' \
                     -d '{"image": "${DOCKER_IMAGE_OWNER}/prj-frontend:${DOCKER_IMAGE_TAG}"}'
                     """
                     sh """
-                    curl -X POST ${ARGOCD_WEBHOOK_URL} \
+                    curl -k -X POST ${ARGOCD_WEBHOOK_URL} \
                     -H 'Content-Type: application/json' \
                     -d '{"image": "${DOCKER_IMAGE_OWNER}/prj-admin:${DOCKER_IMAGE_TAG}"}'
                     """
                     sh """
-                    curl -X POST ${ARGOCD_WEBHOOK_URL} \
+                    curl -k -X POST ${ARGOCD_WEBHOOK_URL} \
                     -H 'Content-Type: application/json' \
                     -d '{"image": "${DOCKER_IMAGE_OWNER}/prj-visitor:${DOCKER_IMAGE_TAG}"}'
                     """
