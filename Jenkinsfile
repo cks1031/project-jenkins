@@ -67,8 +67,8 @@ pipeline {
                         }' \
                         -v
                     """
-               }
-           }
+                }
+            }
         }
 		stage('Docker Logout') {
             steps {
