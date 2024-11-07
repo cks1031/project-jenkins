@@ -5,6 +5,7 @@ pipeline {
 		DOCKER_IMAGE_OWNER = 'nanakia1031'
 		DOCKER_IMAGE_TAG = "v${BUILD_NUMBER}" // 매 빌드마다 고유 태그 생성
 		DOCKER_TOKEN = credentials('dockerhub')
+		ARGOCD_WEBHOOK_URL = 'https://43.202.101.98:30765/api/webhook'  // ArgoCD Webhook URL
 	}
 
     stages {
@@ -45,27 +46,21 @@ pipeline {
         stage('Trigger ArgoCD') {
             steps {
                 script {
-                    def beforeCommit = env.GIT_PREVIOUS_COMMIT ?: 'previous_commit_hash'
-                    def afterCommit = env.GIT_COMMIT
-
+                    // Trigger the ArgoCD webhook after Docker image push
                     sh """
-                    curl -k -X POST https://43.202.101.98:30765/api/webhook \
-                        -H "Content-Type: application/json" \
-                        -d '{
-                            "event": "push",
-                            "ref": "refs/heads/main",
-                            "before": "${beforeCommit}",
-                            "after": "${afterCommit}",
-                            "repository": {
-                                "name": "project-argocd",
-                                "url": "https://github.com/cks1031/project-argocd.git"
-                            },
-                            "pusher": {
-                                "name": "jenkins",
-                                "email": "jenkins@jenkins.com"
-                            }
-                        }' \
-                        -v
+                    curl -X POST ${ARGOCD_WEBHOOK_URL} \
+                    -H 'Content-Type: application/json' \
+                    -d '{"image": "${DOCKER_IMAGE_OWNER}/prj-frontend:${DOCKER_IMAGE_TAG}"}'
+                    """
+                    sh """
+                    curl -X POST ${ARGOCD_WEBHOOK_URL} \
+                    -H 'Content-Type: application/json' \
+                    -d '{"image": "${DOCKER_IMAGE_OWNER}/prj-admin:${DOCKER_IMAGE_TAG}"}'
+                    """
+                    sh """
+                    curl -X POST ${ARGOCD_WEBHOOK_URL} \
+                    -H 'Content-Type: application/json' \
+                    -d '{"image": "${DOCKER_IMAGE_OWNER}/prj-visitor:${DOCKER_IMAGE_TAG}"}'
                     """
                 }
             }
