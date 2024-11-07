@@ -45,13 +45,16 @@ pipeline {
         stage('Trigger ArgoCD') {
             steps {
                 script {
-                    sh '''
+                    def beforeCommit = env.GIT_PREVIOUS_COMMIT ?: 'previous_commit_hash'
+                    def afterCommit = env.GIT_COMMIT
+
+                    sh """
                     curl -k -X POST https://43.202.101.98:30765/api/webhook \
                         -H "Content-Type: application/json" \
                         -d '{
                             "ref": "refs/heads/main",
-                            "before": "abcdef1234567890abcdef1234567890abcdef1234",  # 실제 이전 커밋 ID
-                            "after": "123456abcdef1234567890abcdef12345678901234",  # 현재 커밋 ID
+                            "before": "${beforeCommit}",
+                            "after": "${afterCommit}",
                             "repository": {
                                 "name": "project-argocd",
                                 "url": "https://github.com/cks1031/project-argocd.git"
@@ -61,7 +64,7 @@ pipeline {
                                 "email": "jenkins@jenkins.com"
                             }
                         }'
-                    '''
+                    """
                }
            }
         }
