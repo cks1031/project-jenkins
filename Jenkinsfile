@@ -56,7 +56,7 @@ pipeline {
         stage('Commit and Push ArgoCD Deployment YAML Changes') {
             steps {
                 dir('project-argocd') {
-                    withCredentials([usernamePassword(credentialsId: 'jenkins webhook', usernameVariable: 'cks1031', passwordVariable: 'nanakia#5764')]) {
+                    withCredentials([usernamePassword(credentialsId: 'github-personal-token', usernameVariable: 'cks1031', passwordVariable: 'nanakia#5764')]) {
                         sh '''
                         git config user.name "cks1031"
                         git config user.email "cks1031@naver.com"
