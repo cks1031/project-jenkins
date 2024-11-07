@@ -56,13 +56,15 @@ pipeline {
         stage('Commit and Push ArgoCD Deployment YAML Changes') {
             steps {
                 dir('project-argocd') {
-                    sh '''
-                    git config user.name "cks1031"
-                    git config user.email "cks1031@naver.com"
-                    git add deploy-argocd/templates/deployment.yaml
-                    git commit -m "Update image tags to ${DOCKER_IMAGE_TAG}"
-                    git push origin master
-                    '''
+                    withCredentials([usernamePassword(credentialsId: 'jenkins webhook', usernameVariable: 'cks1031', passwordVariable: 'nanakia#5764')]) {
+                        sh '''
+                        git config user.name "cks1031"
+                        git config user.email "cks1031@naver.com"
+                        git add deploy-argocd/templates/deployment.yaml
+                        git commit -m "Update image tags to ${DOCKER_IMAGE_TAG}"
+                        git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/cks1031/project-argocd.git master
+                        '''
+                    }
                 }
             }
         }
