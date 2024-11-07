@@ -12,8 +12,9 @@ pipeline {
         stage('clone from SCM') {
             steps {
                 sh '''
-                rm -rf project-jenkins
+                rm -rf project-jenkins project-argocd
 				git clone https://github.com/cks1031/project-jenkins.git
+				git clone https://github.com/cks1031/project-argocd.git
 				'''
             }
         }
@@ -43,26 +44,35 @@ pipeline {
 				'''
             }
         }
+        stage('Update ArgoCD Deployment YAML with Image Tags') {
+            steps {
+                sh '''
+                sed -i 's|image: {{.Values.image.mariadb.repository}}:{{.Values.image.mariadb.tag}}|image: ${DOCKER_IMAGE_OWNER}/prj-mariadb:${DOCKER_IMAGE_TAG}|g' project-argocd/deploy-argocd/templates/deployment.yaml
+                sed -i 's|image: {{.Values.image.admin.repository}}:{{.Values.image.admin.tag}}|image: ${DOCKER_IMAGE_OWNER}/prj-admin:${DOCKER_IMAGE_TAG}|g' project-argocd/deploy-argocd/templates/deployment.yaml
+                sed -i 's|image: {{.Values.image.visitor.repository}}:{{.Values.image.visitor.tag}}|image: ${DOCKER_IMAGE_OWNER}/prj-visitor:${DOCKER_IMAGE_TAG}|g' project-argocd/deploy-argocd/templates/deployment.yaml
+                sed -i 's|image: {{.Values.image.frontend.repository}}:{{.Values.image.frontend.tag}}|image: ${DOCKER_IMAGE_OWNER}/prj-frontend:${DOCKER_IMAGE_TAG}|g' project-argocd/deploy-argocd/templates/deployment.yaml
+                '''
+            }
+        }
+        stage('Commit and Push ArgoCD Deployment YAML Changes') {
+            steps {
+                dir('project-argocd') {
+                    sh '''
+                    git config user.name "cks1031"
+                    git config user.email "cks1031@naver.com"
+                    git add deploy-argocd/templates/deployment.yaml
+                    git commit -m "Update image tags to ${DOCKER_IMAGE_TAG}"
+                    git push origin main
+                    '''
+                }
+            }
+        }
+
         stage('Trigger ArgoCD') {
             steps {
-                script {
-                    // Trigger the ArgoCD webhook after Docker image push
-                    sh """
-                    curl -k -X POST ${ARGOCD_WEBHOOK_URL} \
-                    -H 'Content-Type: application/json' \
-                    -d '{"image": "${DOCKER_IMAGE_OWNER}/prj-frontend:${DOCKER_IMAGE_TAG}"}'
-                    """
-                    sh """
-                    curl -k -X POST ${ARGOCD_WEBHOOK_URL} \
-                    -H 'Content-Type: application/json' \
-                    -d '{"image": "${DOCKER_IMAGE_OWNER}/prj-admin:${DOCKER_IMAGE_TAG}"}'
-                    """
-                    sh """
-                    curl -k -X POST ${ARGOCD_WEBHOOK_URL} \
-                    -H 'Content-Type: application/json' \
-                    -d '{"image": "${DOCKER_IMAGE_OWNER}/prj-visitor:${DOCKER_IMAGE_TAG}"}'
-                    """
-                }
+                sh '''
+                curl -k -X POST ${ARGOCD_WEBHOOK_URL}
+                '''
             }
         }
 		stage('Docker Logout') {
