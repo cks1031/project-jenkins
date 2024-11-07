@@ -42,6 +42,15 @@ pipeline {
 				'''
             }
         }
+        stage('Trigger ArgoCD') {
+           steps {
+               script {
+                 sh '''
+                 curl -X POST https://43.202.101.98:30765/api/webhook -H "Content-Type: application/json" -d '{"ref": "refs/heads/main"}'
+                 '''
+               }
+           }
+        }
 		stage('Docker Logout') {
             steps {
                 sh '''
