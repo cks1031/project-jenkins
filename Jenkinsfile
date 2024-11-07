@@ -52,6 +52,7 @@ pipeline {
                     curl -k -X POST https://43.202.101.98:30765/api/webhook \
                         -H "Content-Type: application/json" \
                         -d '{
+                            "event": "push",
                             "ref": "refs/heads/main",
                             "before": "${beforeCommit}",
                             "after": "${afterCommit}",
@@ -63,7 +64,8 @@ pipeline {
                                 "name": "jenkins",
                                 "email": "jenkins@jenkins.com"
                             }
-                        }'
+                        }' \
+                        -v
                     """
                }
            }
