@@ -46,7 +46,7 @@ pipeline {
            steps {
                script {
                  sh '''
-                 curl -X POST https://43.202.101.98:30765/api/webhook -H "Content-Type: application/json" -d '{"ref": "refs/heads/main"}'
+                 curl -k -X POST https://43.202.101.98:30765/api/webhook -H "Content-Type: application/json" -d '{"ref": "refs/heads/main"}'
                  '''
                }
            }
