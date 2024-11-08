@@ -3,30 +3,32 @@ pipeline {
 
     environment {
         DOCKER_IMAGE_OWNER = 'nanakia1031'
-        DOCKER_IMAGE_TAG = "v${BUILD_NUMBER}" // unique tag for each build
+         DOCKER_BUILD_TAG = "v${env.BUILD_NUMBER}"
         DOCKER_TOKEN = credentials('dockerhub')
         GIT_CREDENTIALS = credentials('github_token')
-        REPO_URL = 'cks1031/project-argocd.git'
+        REPO_URL = 'cks1031/project-jenkins.git'
+        ARGOCD_REPO_URL = 'cks1031/project-argocd.git'
+        COMMIT_MESSAGE = 'Update README.md via Jenkins Pipeline'
     }
 
     stages {
-        stage('Clone from SCM') {
-            steps {
-                sh '''
-                rm -rf project-jenkins project-argocd
-                git clone https://github.com/cks1031/project-jenkins.git
-                git clone https://github.com/cks1031/project-argocd.git
-                '''
+            stage('Clone from SCM') {
+                steps {
+                    dir('project-jenkins') {
+                        git branch: 'master', url: "https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@github.com/${REPO_URL}"
+                    }
+                    dir('project-argocd') {
+                        git branch: 'master', url: "https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@github.com/${ARGOCD_REPO_URL}"
+                    }
             }
         }
-
-        stage('Docker Image Building') {
-            steps {
+    stage('Docker Image Building') {
+          steps {
                 sh '''
                 cd project-jenkins
-                docker build -t ${DOCKER_IMAGE_OWNER}/prj-frontend:${DOCKER_IMAGE_TAG} ./frontend
-                docker build -t ${DOCKER_IMAGE_OWNER}/prj-admin:${DOCKER_IMAGE_TAG} ./admin-service
-                docker build -t ${DOCKER_IMAGE_OWNER}/prj-visitor:${DOCKER_IMAGE_TAG} ./visitor-service
+                docker build -t ${DOCKER_IMAGE_OWNER}/prj-frontend:${DOCKER_BUILD_TAG} ./frontend
+                docker build -t ${DOCKER_IMAGE_OWNER}/prj-admin:${DOCKER_BUILD_TAG} ./admin-service
+                docker build -t ${DOCKER_IMAGE_OWNER}/prj-visitor:${DOCKER_BUILD_TAG} ./visitor-service
                 '''
             }
         }
@@ -42,9 +44,9 @@ pipeline {
         stage('Docker Image Pushing') {
             steps {
                 sh '''
-                docker push ${DOCKER_IMAGE_OWNER}/prj-frontend:${DOCKER_IMAGE_TAG}
-                docker push ${DOCKER_IMAGE_OWNER}/prj-admin:${DOCKER_IMAGE_TAG}
-                docker push ${DOCKER_IMAGE_OWNER}/prj-visitor:${DOCKER_IMAGE_TAG}
+                docker push ${DOCKER_IMAGE_OWNER}/prj-frontend:${DOCKER_BUILD_TAG}
+                docker push ${DOCKER_IMAGE_OWNER}/prj-admin:${DOCKER_BUILD_TAG}
+                docker push ${DOCKER_IMAGE_OWNER}/prj-visitor:${DOCKER_BUILD_TAG}
                 '''
             }
         }
@@ -52,9 +54,9 @@ pipeline {
         stage('Update ArgoCD Deployment YAML with Image Tags') {
             steps {
                 sh '''
-                sed -i 's|image: {{ .Values.image.admin.repository }}|image: nanakia1031/prj-admin:{{.Values.image.admin.tag}}|g' project-argocd/deploy-argocd/templates/deployment.yaml
-                sed -i 's|image: {{ .Values.image.frontend.repository }}|image: nanakia1031/prj-frontend:{{.Values.image.visitor.tag}}|g' project-argocd/deploy-argocd/templates/deployment.yaml
-                sed -i 's|image: {{ .Values.image.visitor.repository }}|image: nanakia1031/prj-visitor:{{.Values.image.frontend.tag}}|g' project-argocd/deploy-argocd/templates/deployment.yaml
+                sed -i "s|image: {{.Values.image.admin.repository}}|image: ${DOCKER_IMAGE_OWNER}/prj-admin:${DOCKER_BUILD_TAG}|g" deploy-argocd/templates/deployment.yaml
+                sed -i "s|image: {{.Values.image.frontend.repository}}|image: ${DOCKER_IMAGE_OWNER}/prj-frontend:${DOCKER_BUILD_TAG}|g" deploy-argocd/templates/deployment.yaml
+                sed -i "s|image: {{.Values.image.visitor.repository}}|image: ${DOCKER_IMAGE_OWNER}/prj-visitor:${DOCKER_BUILD_TAG}|g" deploy-argocd/templates/deployment.yaml
                 '''
             }
         }
