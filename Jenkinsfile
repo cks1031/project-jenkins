@@ -65,7 +65,7 @@ pipeline {
                     sh '''
                     git config user.name "cks1031"
                     git config user.email "cks1031@jenkins.com"
-                    ggit add deploy-argocd/values.yaml
+                    git add deploy-argocd/values.yaml
                     git commit -m "Update image tags to ${DOCKER_IMAGE_TAG}"
                     git push https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@github.com/${REPO_URL} master
                     '''
