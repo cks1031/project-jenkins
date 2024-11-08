@@ -54,7 +54,7 @@ pipeline {
 
         stage('Update ArgoCD values.yaml with Image Tags') {
             steps {
-                dir('finalprojectargocd') {
+                dir('project-argocd') {
                     sh """
                     sed -i "s|frontend:.*|frontend:\\n    repository: ${DOCKER_IMAGE_OWNER}/prj-frontend\\n    tag: \\\"${DOCKER_BUILD_TAG}\\\"|g" deploy-argocd/values.yaml
                     sed -i "s|admin:.*|admin:\\n    repository: ${DOCKER_IMAGE_OWNER}/prj-admin\\n    tag: \\\"${DOCKER_BUILD_TAG}\\\"|g" deploy-argocd/values.yaml
