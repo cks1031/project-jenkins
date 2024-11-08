@@ -56,9 +56,9 @@ pipeline {
             steps {
                 dir('project-argocd') {
                     sh """
-                    sed -i "s|frontend:.*|frontend:\\n    repository: ${DOCKER_IMAGE_OWNER}/prj-frontend\\n    tag: \\\"${DOCKER_BUILD_TAG}\\\"|g" deploy-argocd/values.yaml
-                    sed -i "s|admin:.*|admin:\\n    repository: ${DOCKER_IMAGE_OWNER}/prj-admin\\n    tag: \\\"${DOCKER_BUILD_TAG}\\\"|g" deploy-argocd/values.yaml
-                    sed -i "s|visitor:.*|visitor:\\n    repository: ${DOCKER_IMAGE_OWNER}/prj-visitor\\n    tag: \\\"${DOCKER_BUILD_TAG}\\\"|g" deploy-argocd/values.yaml
+                    sed -i "s|repository: ${DOCKER_IMAGE_OWNER}/prj-frontend\\n    tag: \\\".*\\\"|repository: ${DOCKER_IMAGE_OWNER}/prj-frontend\\n    tag: \\\"${DOCKER_BUILD_TAG}\\\"|g" deploy-argocd/values.yaml
+                    sed -i "s|repository: ${DOCKER_IMAGE_OWNER}/prj-admin\\n    tag: \\\".*\\\"|repository: ${DOCKER_IMAGE_OWNER}/prj-admin\\n    tag: \\\"${DOCKER_BUILD_TAG}\\\"|g" deploy-argocd/values.yaml
+                    sed -i "s|repository: ${DOCKER_IMAGE_OWNER}/prj-visitor\\n    tag: \\\".*\\\"|repository: ${DOCKER_IMAGE_OWNER}/prj-visitor\\n    tag: \\\"${DOCKER_BUILD_TAG}\\\"|g" deploy-argocd/values.yaml
                     """
                 }
             }
