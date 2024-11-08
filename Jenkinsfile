@@ -52,9 +52,9 @@ pipeline {
         stage('Update ArgoCD Deployment YAML with Image Tags') {
             steps {
                 sh '''
-                sed -i 's|image: {{.Values.image.admin.repository}}:{{.Values.image.admin.tag}}|image: ${DOCKER_IMAGE_OWNER}/prj-admin:${DOCKER_IMAGE_TAG}|g' project-argocd/deploy-argocd/templates/deployment.yaml
-                sed -i 's|image: {{.Values.image.visitor.repository}}:{{.Values.image.visitor.tag}}|image: ${DOCKER_IMAGE_OWNER}/prj-visitor:${DOCKER_IMAGE_TAG}|g' project-argocd/deploy-argocd/templates/deployment.yaml
-                sed -i 's|image: {{.Values.image.frontend.repository}}:{{.Values.image.frontend.tag}}|image: ${DOCKER_IMAGE_OWNER}/prj-frontend:${DOCKER_IMAGE_TAG}|g' project-argocd/deploy-argocd/templates/deployment.yaml
+                sed -i 's|image: {{ .Values.image.admin.repository }}|image: nanakia1031/prj-admin:{{.Values.image.admin.tag}}|g' project-argocd/deploy-argocd/templates/deployment.yaml
+                sed -i 's|image: {{ .Values.image.frontend.repository }}|image: nanakia1031/prj-frontend:{{.Values.image.visitor.tag}}|g' project-argocd/deploy-argocd/templates/deployment.yaml
+                sed -i 's|image: {{ .Values.image.visitor.repository }}|image: nanakia1031/prj-visitor:{{.Values.image.frontend.tag}}|g' project-argocd/deploy-argocd/templates/deployment.yaml
                 '''
             }
         }
