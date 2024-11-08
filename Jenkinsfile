@@ -54,9 +54,9 @@ pipeline {
         stage('Update ArgoCD Deployment YAML with Image Tags') {
             steps {
                 sh '''
-                sed -i "s|image: {{.Values.image.admin.repository}}|image: ${DOCKER_IMAGE_OWNER}/prj-admin:${DOCKER_BUILD_TAG}|g" project-argocd/deploy-argocd/templates/deployment.yaml
-                sed -i "s|image: {{.Values.image.frontend.repository}}|image: ${DOCKER_IMAGE_OWNER}/prj-frontend:${DOCKER_BUILD_TAG}|g" project-argocd/deploy-argocd/templates/deployment.yaml
-                sed -i "s|image: {{.Values.image.visitor.repository}}|image: ${DOCKER_IMAGE_OWNER}/prj-visitor:${DOCKER_BUILD_TAG}|g" project-argocd/deploy-argocd/templates/deployment.yaml
+                sed -i "s|image: {{.Values.image.admin.repository}}|image: ${DOCKER_IMAGE_OWNER}/prj-admin:${DOCKER_BUILD_TAG}|g" project-argocd/deploy-argocd/values.yaml
+                sed -i "s|image: {{.Values.image.frontend.repository}}|image: ${DOCKER_IMAGE_OWNER}/prj-frontend:${DOCKER_BUILD_TAG}|g" project-argocd/deploy-argocd/values.yaml
+                sed -i "s|image: {{.Values.image.visitor.repository}}|image: ${DOCKER_IMAGE_OWNER}/prj-visitor:${DOCKER_BUILD_TAG}|g" project-argocd/deploy-argocd/values.yaml
                 '''
             }
         }
