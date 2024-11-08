@@ -5,7 +5,8 @@ pipeline {
 		DOCKER_IMAGE_OWNER = 'nanakia1031'
 		DOCKER_IMAGE_TAG = "v${BUILD_NUMBER}" // 매 빌드마다 고유 태그 생성
 		DOCKER_TOKEN = credentials('dockerhub')
-		ARGOCD_WEBHOOK_URL = 'https://43.202.101.98:30765/api/webhook'  // ArgoCD Webhook URL
+		GIT_CREDENTIALS = credentials('github_token')
+		REPO_URL = 'cks1031/project-argocd.git'
 	}
 
     stages {
@@ -56,24 +57,15 @@ pipeline {
         stage('Commit and Push ArgoCD Deployment YAML Changes') {
             steps {
                 dir('project-argocd') {
-                    withCredentials([usernamePassword(credentialsId: 'github-personal-token', usernameVariable: 'cks1031', passwordVariable: 'nanakia#5764')]) {
                         sh '''
-                        git config user.name "cks1031"
-                        git config user.email "cks1031@naver.com"
-                        git add deploy-argocd/templates/deployment.yaml
-                        git commit -m "Update image tags to ${DOCKER_IMAGE_TAG}"
-                        git push https://$GIT_USERNAME:$GIT_PASSWORD@github.com/cks1031/project-argocd.git master
+                            git config user.name "cks1031"
+                            git config user.email "cks1031@jenkins.com"
+                            git add deploy-argocd/templates/deployment.yaml
+                            git commit -m "Update image tags to ${DOCKER_IMAGE_TAG}"
+                            git push https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@github.com/${REPO_URL} main
                         '''
                     }
                 }
-            }
-        }
-
-        stage('Trigger ArgoCD') {
-            steps {
-                sh '''
-                curl -k -X POST ${ARGOCD_WEBHOOK_URL}
-                '''
             }
         }
 		stage('Docker Logout') {
