@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE_OWNER = 'nanakia1031'
-         DOCKER_BUILD_TAG = "v${env.BUILD_NUMBER}"
+        DOCKER_BUILD_TAG = "v${env.BUILD_NUMBER}"
         DOCKER_TOKEN = credentials('dockerhub')
         GIT_CREDENTIALS = credentials('github_token')
         REPO_URL = 'cks1031/project-jenkins.git'
@@ -52,11 +52,15 @@ pipeline {
             }
         }
 
-        stage('Update ArgoCD Deployment YAML with Image Tags') {
+        stage('Update ArgoCD values.yaml with Image Tags') {
             steps {
-                sh '''
-                sed -i "s|tag: \"latest\"|tag: \"${DOCKER_BUILD_TAG}\"|g" project-argocd/deploy-argocd/values.yaml 
-                '''
+                dir('finalprojectargocd') {
+                    sh """
+                    sed -i "s|frontend:.*|frontend:\\n    repository: ${DOCKER_IMAGE_OWNER}/prj-frontend\\n    tag: \\\"${DOCKER_BUILD_TAG}\\\"|g" deploy-argocd/values.yaml
+                    sed -i "s|admin:.*|admin:\\n    repository: ${DOCKER_IMAGE_OWNER}/prj-admin\\n    tag: \\\"${DOCKER_BUILD_TAG}\\\"|g" deploy-argocd/values.yaml
+                    sed -i "s|visitor:.*|visitor:\\n    repository: ${DOCKER_IMAGE_OWNER}/prj-visitor\\n    tag: \\\"${DOCKER_BUILD_TAG}\\\"|g" deploy-argocd/values.yaml
+                    """
+                }
             }
         }
 
@@ -83,8 +87,10 @@ pipeline {
         stage('Push Changes') {
             steps {
                 dir('project-argocd') {
-                    script {
-                        sh "git push https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@github.com/${ARGOCD_REPO_URL} master"
+                    withCredentials([usernamePassword(credentialsId: 'github_token', usernameVariable: 'GIT_CREDENTIALS_USR', passwordVariable: 'GIT_CREDENTIALS_PSW')]) {
+                        sh '''
+                        git push https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@github.com/${ARGOCD_REPO_URL} master
+                        '''
                     }
                 }
             }
