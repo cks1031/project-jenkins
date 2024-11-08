@@ -74,13 +74,5 @@ pipeline {
                 }
             }
         }
-
-        stage('Docker Logout') {
-            steps {
-                sh '''
-                docker logout
-                '''
-            }
-        }
     }
 }
