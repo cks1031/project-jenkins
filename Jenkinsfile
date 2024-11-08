@@ -19,13 +19,13 @@ pipeline {
                     }
                     dir('project-argocd') {
                         git branch: 'master', url: "https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@github.com/${ARGOCD_REPO_URL}"
-                    }
+                   }
             }
         }
     stage('Docker Image Building') {
           steps {
                 sh '''
-                cd project-jenkins
+                docker build -t ${DOCKER_IMAGE_OWNER}/prj-frontend:latest ./frontend
                 docker build -t ${DOCKER_IMAGE_OWNER}/prj-frontend:${DOCKER_BUILD_TAG} ./frontend
                 docker build -t ${DOCKER_IMAGE_OWNER}/prj-admin:${DOCKER_BUILD_TAG} ./admin-service
                 docker build -t ${DOCKER_IMAGE_OWNER}/prj-visitor:${DOCKER_BUILD_TAG} ./visitor-service
@@ -44,6 +44,7 @@ pipeline {
         stage('Docker Image Pushing') {
             steps {
                 sh '''
+                docker push ${DOCKER_IMAGE_OWNER}/prj-frontend:latest
                 docker push ${DOCKER_IMAGE_OWNER}/prj-frontend:${DOCKER_BUILD_TAG}
                 docker push ${DOCKER_IMAGE_OWNER}/prj-admin:${DOCKER_BUILD_TAG}
                 docker push ${DOCKER_IMAGE_OWNER}/prj-visitor:${DOCKER_BUILD_TAG}
@@ -59,26 +60,39 @@ pipeline {
             }
         }
 
-        stage('Commit and Push ArgoCD Deployment YAML Changes') {
+        stage('Commit Changes') {
             steps {
                 dir('project-argocd') {
-                    sh '''
-                    git config user.name "cks1031"
-                    git config user.email "cks1031@jenkins.com"
-                    git add deploy-argocd/values.yaml
-                    git commit -m "Update image tags to ${DOCKER_IMAGE_TAG}"
-                    git push https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@github.com/${REPO_URL} master
-                    '''
+                    script{
+                        def changes = sh(script: "git status --porcelain", returnStdout: true).trim()
+                        if (changes) {
+                            sh '''
+                            git config user.name "cks1031"
+                            git config user.email "cks1031@jenkins.com"
+                            git add deploy-argocd/values.yaml
+                            git commit -m "Update image tags to ${DOCKER_BUILD_TAG}"
+                            '''
+                        } else {
+                            echo "No changes to commit"
+                        }
+                    }
                 }
             }
         }
 
-        stage('Docker Logout') {
+        stage('Push Changes') {
             steps {
-                sh '''
-                docker logout
-                '''
+                dir('project-argocd') {
+                    script {
+                        sh "git push https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@github.com/${ARGOCD_REPO_URL} main"
+                    }
+                }
             }
+        }
+    }
+    post {
+        always {
+            cleanWs()
         }
     }
 }
