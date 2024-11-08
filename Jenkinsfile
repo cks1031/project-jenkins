@@ -54,9 +54,7 @@ pipeline {
         stage('Update ArgoCD Deployment YAML with Image Tags') {
             steps {
                 sh '''
-                sed -i "s|image: {{.Values.image.admin.repository}}|image: ${DOCKER_IMAGE_OWNER}/prj-admin:${DOCKER_BUILD_TAG}|g" project-argocd/deploy-argocd/values.yaml
-                sed -i "s|image: {{.Values.image.frontend.repository}}|image: ${DOCKER_IMAGE_OWNER}/prj-frontend:${DOCKER_BUILD_TAG}|g" project-argocd/deploy-argocd/values.yaml
-                sed -i "s|image: {{.Values.image.visitor.repository}}|image: ${DOCKER_IMAGE_OWNER}/prj-visitor:${DOCKER_BUILD_TAG}|g" project-argocd/deploy-argocd/values.yaml
+                sed -i "s|tag: \"latest\"|tag: \"${DOCKER_BUILD_TAG}\"|g" project-argocd/deploy-argocd/values.yaml 
                 '''
             }
         }
@@ -67,7 +65,7 @@ pipeline {
                     sh '''
                     git config user.name "cks1031"
                     git config user.email "cks1031@jenkins.com"
-                    git add deploy-argocd/templates/deployment.yaml
+                    ggit add deploy-argocd/values.yaml
                     git commit -m "Update image tags to ${DOCKER_IMAGE_TAG}"
                     git push https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@github.com/${REPO_URL} master
                     '''
