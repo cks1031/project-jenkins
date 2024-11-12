@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE_OWNER = 'nanakia1031'
-        DOCKER_BUILD_TAG = "v${env.BUILD_NUMBER}"
+        DOCKER_BUILD_TAG = "arm-v${env.BUILD_NUMBER}"
         DOCKER_TOKEN = credentials('dockerhub')
         GIT_CREDENTIALS = credentials('github_token')
         REPO_URL = 'cks1031/project-jenkins.git'
