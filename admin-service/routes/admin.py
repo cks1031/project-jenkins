@@ -10,7 +10,7 @@ from starlette.requests import Request
 from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 from fastapi import HTTPException
-from datetime import datetime, timezone
+from datetime import datetime
 from service import database
 from models.admin import User, Admin, EntryExitLog, Status
 from service.database import get_db
@@ -120,10 +120,7 @@ async def statistics_page(db: Session = Depends(get_db)):
     total_duration = sum(
         (log.exit_time - log.entry_time).total_seconds() / 60
         for log in logs:
-            if log.entry_time:
-                log.entry_time = log.entry_time.astimezone(timezone.kst)
-            if log.exit_time:
-                log.exit_time = log.exit_time.astimezone(timezone.kst)
+            for log in logs if log.entry_time and log.exit_time
         )
     avg_visit_duration = total_duration / total_visitors if total_visitors > 0 else 0
 
