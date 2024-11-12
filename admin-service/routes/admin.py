@@ -124,7 +124,7 @@ async def statistics_page(db: Session = Depends(get_db)):
                 log.entry_time = log.entry_time.astimezone(timezone.kst)
             if log.exit_time:
                 log.exit_time = log.exit_time.astimezone(timezone.kst)
-    )
+        )
     avg_visit_duration = total_duration / total_visitors if total_visitors > 0 else 0
 
     # 요일별 방문자 수
