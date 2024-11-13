@@ -1,4 +1,3 @@
-# 베이스 이미지로 Python 3.11 사용
 FROM python:3.11-slim-bullseye
 
 # 작업 디렉토리 설정
@@ -15,4 +14,3 @@ COPY . .
 
 # FastAPI 애플리케이션 실행
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8050", "--reload"]
-
